@@ -1,2 +1,2 @@
 # Management Invoice System
-# Autor: Sotiris Kastanas 
+Autor: Sotiris Kastanas 
