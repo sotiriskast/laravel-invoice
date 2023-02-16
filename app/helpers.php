@@ -15,13 +15,11 @@ use Illuminate\Support\Facades\Auth;
 use Stripe\Stripe;
 
 /**
- *
  * @return Authenticatable|null
  */
 function getLogInUser()
 {
     return Auth::user();
-
 }
 
 /**
@@ -43,7 +41,6 @@ function getAppName()
  */
 function getLogoUrl()
 {
-
     static $appLogo;
 
     if (empty($appLogo)) {
@@ -54,7 +51,6 @@ function getLogoUrl()
 }
 
 /**
- *
  * @return string[]
  */
 function getUserLanguages()
@@ -97,11 +93,15 @@ function getInvoicePaidAmount($invoiceId)
     $paid = 0;
     $invoice = Invoice::whereId($invoiceId)->with('payments')->firstOrFail();
 
-    foreach ($invoice->payments as $payment) {
-        if ($payment->payment_mode == \App\Models\Payment::MANUAL && $payment->is_approved !== \App\Models\Payment::APPROVED) {
-            continue;
+    if ($invoice->status != Invoice::PAID) {
+        foreach ($invoice->payments as $payment) {
+            if ($payment->payment_mode == \App\Models\Payment::MANUAL && $payment->is_approved !== \App\Models\Payment::APPROVED) {
+                continue;
+            }
+            $paid += $payment->amount;
         }
-        $paid += $payment->amount;
+    } else {
+        $paid += $invoice->final_amount;
     }
 
     return $paid;
@@ -123,13 +123,11 @@ function getInvoiceDueAmount($invoiceId)
         }
         $paid += $payment->amount;
     }
-    $dueAmount = $invoice->final_amount - $paid;
 
-    return $dueAmount;
+    return $invoice->status != \App\Models\Invoice::PAID ? $invoice->final_amount - $paid : 0;
 }
 
 /**
- *
  * @return int
  */
 function getLogInUserId()
@@ -160,7 +158,6 @@ function getClientDashboardURL()
 
 /**
  * @param $number
- *
  * @return string|string[]
  */
 function removeCommaFromNumbers($number)
@@ -170,7 +167,6 @@ function removeCommaFromNumbers($number)
 
 /**
  * @param $countryId
- *
  * @return array
  */
 function getStates($countryId)
@@ -180,7 +176,6 @@ function getStates($countryId)
 
 /**
  * @param $stateId
- *
  * @return array
  */
 function getCities($stateId): array
@@ -260,7 +255,6 @@ function getInvoiceNoSuffix()
     return $invoiceNoSuffix->value;
 }
 
-
 function getDefaultTax()
 {
     return Tax::where('is_default', '=', '1')->first()->id ?? null;
@@ -278,10 +272,9 @@ function setStripeApiKey()
 
 // current date format
 /**
- *
  * @return mixed
  */
-function currentDateFormat()
+function currentDateFormat(): mixed
 {
     /** @var Setting $dateFormat */
     static $dateFormat;
@@ -293,10 +286,9 @@ function currentDateFormat()
 }
 
 /**
- *
  * @return string
  */
-function momentJsCurrentDateFormat()
+function momentJsCurrentDateFormat(): string
 {
     $key = Setting::DateFormatArray[currentDateFormat()];
 
@@ -309,9 +301,9 @@ function momentJsCurrentDateFormat()
 function addNotification($data)
 {
     $notificationRecord = [
-        'type'    => $data[0],
+        'type' => $data[0],
         'user_id' => $data[1],
-        'title'   => $data[2],
+        'title' => $data[2],
     ];
 
     if ($user = User::find($data[1])) {
@@ -336,7 +328,6 @@ function getNotification()
 
 /**
  * @param  array  $data
- *
  * @return array
  */
 function getAllNotificationUser($data)
@@ -348,7 +339,6 @@ function getAllNotificationUser($data)
 
 /**
  * @param $notificationType
- *
  * @return string|void
  */
 function getNotificationIcon($notificationType)
@@ -384,12 +374,10 @@ function getAdminUser()
  * @param  array  $models
  * @param  string  $columnName
  * @param  int  $id
- *
  * @return bool
  */
 function canDelete(array $models, string $columnName, int $id)
 {
-
     foreach ($models as $model) {
         $result = $model::where($columnName, $id)->exists();
 
@@ -418,7 +406,6 @@ function numberFormat(float $num, int $decimals = 2)
 if (! function_exists('getSettingValue')) {
     /**
      * @param $keyName
-     *
      * @return mixed
      */
     function getSettingValue($keyName)
@@ -443,22 +430,21 @@ function getPaymentGateway($keyName)
     static $settingValues;
 
     if (isset($settingValues[$key])) {
-        return ($settingValues[$key]);
+        return $settingValues[$key];
     }
     /** @var Setting $setting */
     $setting = Setting::where('key', '=', $keyName)->first();
 
-    if ($setting->value !== "") {
+    if ($setting->value !== '') {
         $settingValues[$key] = $setting->value;
     } else {
-        $settingValues[$key] = (env($key) !== "") ? env($key) : "";
+        $settingValues[$key] = (env($key) !== '') ? env($key) : '';
     }
 
     return $setting->value;
 }
 
 /**
- *
  * @return mixed
  */
 function getCurrencyCode()
@@ -488,7 +474,7 @@ function getInvoiceCurrencyIcon($currencyId)
 {
     $invoiceCurrencyCode = Currency::whereId($currencyId)->first();
 
-    return $invoiceCurrencyCode->icon;
+    return $invoiceCurrencyCode->icon ?? '₹';
 }
 
 /**
@@ -506,8 +492,6 @@ function getCurrentVersion()
 /**
  * @param $totalAmount
  * @param  int  $precision
- *
- *
  */
 function formatTotalAmount($totalAmount, $precision = 2)
 {
@@ -549,7 +533,6 @@ function formatTotalAmount($totalAmount, $precision = 2)
     return $numberFormat.$suffix;
 }
 
-
 /**
  * @param $amount
  * @param  false  $formatting
@@ -575,7 +558,6 @@ function getCurrencyAmount($amount, $formatting = false)
  * @param $amount
  * @param $currencyId
  * @param  false  $formatting
- *
  * @return string
  */
 function getInvoiceCurrencyAmount($amount, $currencyId, $formatting = false): string
@@ -612,4 +594,15 @@ function checkContactUniqueness($value, $regionCode, $exceptId = null): bool
     }
 
     return false;
+}
+
+/**
+ * @return array
+ */
+function getPayPalSupportedCurrencies(): array
+{
+    return [
+        'AUD', 'BRL', 'CAD', 'CNY', 'CZK', 'DKK', 'EUR', 'HKD', 'HUF', 'ILS', 'JPY', 'MYR', 'MXN', 'TWD', 'NZD', 'NOK',
+        'PHP', 'PLN', 'GBP', 'RUB', 'SGD', 'SEK', 'CHF', 'THB', 'USD',
+    ];
 }

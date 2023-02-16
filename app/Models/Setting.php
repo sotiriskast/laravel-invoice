@@ -19,6 +19,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read mixed|string $logo_url
  * @property-read int|null $media_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Setting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Setting newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Setting query()
@@ -36,22 +37,24 @@ class Setting extends Model implements HasMedia
     public $table = 'settings';
 
     const PATH = 'settings';
+
     const DEFAULT_TEMPLATE = 1;
 
     const CURRENCY_AFTER_AMOUNT = 1;
+
     const PAYMENT_AUTO_APPROVED = 1;
 
     const INVOICE__TEMPLATE_ARRAY = [
-        'defaultTemplate'  => 'Default',
-        'newYorkTemplate'  => 'New York',
-        'torontoTemplate'  => 'Toronto',
-        'rioTemplate'      => 'Rio',
-        'londonTemplate'   => 'London',
+        'defaultTemplate' => 'Default',
+        'newYorkTemplate' => 'New York',
+        'torontoTemplate' => 'Toronto',
+        'rioTemplate' => 'Rio',
+        'londonTemplate' => 'London',
         'istanbulTemplate' => 'Istanbul',
-        'mumbaiTemplate'   => 'Mumbai',
+        'mumbaiTemplate' => 'Mumbai',
         'hongKongTemplate' => 'Hong Kong',
-        'tokyoTemplate'    => 'Tokyo',
-        'parisTemplate'    => 'Paris',
+        'tokyoTemplate' => 'Tokyo',
+        'parisTemplate' => 'Paris',
     ];
 
     const DateFormatArray = [
@@ -71,21 +74,26 @@ class Setting extends Model implements HasMedia
         'value',
     ];
 
+    protected $casts = [
+        'key' => 'string',
+        'value' => 'string',
+    ];
+
     /**
      * Validation rules
      *
      * @var array
      */
     public static $rules = [
-        'app_name'        => 'string',
-        'company_name'    => 'string',
-        'app_logo'        => 'nullable|mimes:jpg,jpeg,png',
-        'company_logo'    => 'nullable|mimes:jpg,jpeg,png',
-        'stripe_key'      => 'nullable',
-        'stripe_secret'   => 'nullable',
-        'paypal_client_id'=> 'nullable',
-        'paypal_secret'   => 'nullable',
-        'razorpay_key'    => 'nullable',
+        'app_name' => 'string',
+        'company_name' => 'string',
+        'app_logo' => 'nullable|mimes:jpg,jpeg,png',
+        'company_logo' => 'nullable|mimes:jpg,jpeg,png',
+        'stripe_key' => 'nullable',
+        'stripe_secret' => 'nullable',
+        'paypal_client_id' => 'nullable',
+        'paypal_secret' => 'nullable',
+        'razorpay_key' => 'nullable',
         'razorpay_secret' => 'nullable',
     ];
 
